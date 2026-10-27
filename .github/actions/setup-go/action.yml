@@ -1,0 +1,46 @@
+name: Setup Go
+description: Setup Go and private module access
+
+inputs:
+  go-version-file:
+    description: Go version file
+    required: false
+    default: go.mod
+  app-id:
+    description: GitHub App ID for private Go modules
+    required: true
+  private-key:
+    description: GitHub App private key for private Go modules
+    required: true
+  owner:
+    description: GitHub owner for the app token
+    required: false
+    default: microbiotica
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: ${{ inputs.go-version-file }}
+
+    - name: Setup Go env
+      shell: bash
+      run: |
+        go env -w GOPRIVATE=github.com/microbiotica/*
+        go env -w GONOSUMDB=github.com/microbiotica/*
+
+    - name: Mint a GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+        owner: ${{ inputs.owner }}
+
+    - name: Configure git for private Go modules
+      shell: bash
+      env:
+        GH_APP_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        git config --global url."https://x-access-token:${GH_APP_TOKEN}@github.com/".insteadOf "https://github.com/"

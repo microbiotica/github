@@ -1,0 +1,39 @@
+name: go-test
+on:
+  workflow_call:
+    secrets:
+      GH_GO_MODULES_APP_ID:
+        required: true
+      GH_GO_MODULES_APP_PRIVATE_KEY:
+        required: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: microbiotica/github-workflows/.github/actions/setup-go
+        with:
+          app-id: ${{ secrets.GH_GO_MODULES_APP_ID }}
+          private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
+
+      - name: go test
+        run: go run gotest.tools/gotestsum@v1.12.0 --junitfile report.xml --format testname -- -race ./...
+
+      - name: Publish test report
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: report.xml
+          check_name: Test Report
+          comment: true
+          detailed_summary: true
+          annotate_only: true
