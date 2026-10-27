@@ -12,8 +12,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  lint:
-    name: lint
+  format:
+    name: format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
