@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Go
-        uses: microbiotica/github/.github/actions/setup-go
+        uses: microbiotica/github/.github/actions/setup-go@main
         with:
           app-id: ${{ secrets.GH_GO_MODULES_APP_ID }}
           private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
