@@ -26,7 +26,7 @@ jobs:
           private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
 
       - name: go test
-        run: go run gotest.tools/gotestsum@v1.12.0 --junitfile report.xml --format testname -- -race ./...
+        run: go run gotest.tools/gotestsum@latest --junitfile report.xml --format testname -- -race ./...
 
       - name: Publish test report
         if: ${{ !cancelled() }}
