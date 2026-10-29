@@ -1,4 +1,4 @@
-name: go-lint
+name: Go Lint
 on:
   workflow_call:
     secrets:
@@ -18,8 +18,29 @@ permissions:
   pull-requests: read
 
 jobs:
-  lint:
-    name: lint
+  go-fmt:
+    name: go fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: microbiotica/github/.github/actions/setup-go@main
+        with:
+          app-id: ${{ secrets.GH_GO_MODULES_APP_ID }}
+          private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
+
+      - name: go fmt
+        run: git ls-files '*.go' | xargs -r gofmt -w
+
+      - name: Suggest go fmt changes
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: gofmt
+          fail_level: error
+
+  golangci-lint:
+    name: golangci-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

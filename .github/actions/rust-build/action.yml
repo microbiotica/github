@@ -1,0 +1,46 @@
+name: Rust Build
+description: Builds a Rust binary
+
+inputs:
+  bin:
+    description: The name of the binary to build
+    required: true
+  target:
+    description: The target architecture to build for
+    default: x86_64-unknown-linux-musl
+  release:
+    description: Whether to build in release mode
+    default: "true"
+  cargo-options:
+    description: Additional options to pass to cargo build
+    default: ""
+
+runs:
+  using: composite
+
+  steps:
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ inputs.target }}
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        shared-key: ${{ inputs.bin }}-${{ inputs.target }}-${{ inputs.release == 'true' && 'release' || 'debug' }}
+
+    - name: cargo build
+      shell: bash
+      run: |
+        cargo build --locked --bin ${{ inputs.bin }} --target ${{ inputs.target }} ${{ inputs.release == 'true' && '--release' || '' }} ${{ inputs.cargo-options }}
+
+    - name: prepare the built binary
+      shell: bash
+      run: |
+        mkdir -p dist
+        cp target/${{ inputs.target }}/${{ inputs.release == 'true' && 'release' || 'debug' }}/${{ inputs.bin }} "dist/${{ inputs.bin }}.${{ inputs.target }}"
+
+    - name: upload the built binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.bin }}.${{ inputs.target }}
+        path: dist/${{ inputs.bin }}.${{ inputs.target }}
+        if-no-files-found: error

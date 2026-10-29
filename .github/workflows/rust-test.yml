@@ -1,0 +1,48 @@
+name: Rust Test
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  rust-test:
+    name: rust test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        if: ${{ inputs.setup-python }}
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
+
+      - name: Configure nextest JUnit output
+        run: |
+          mkdir -p .config
+          cat > .config/nextest.toml <<'EOF'
+          [profile.ci]
+          junit = { path = "junit.xml" }
+          EOF
+
+      - name: Run Rust tests
+        run: cargo nextest run --workspace --all-targets --all-features --locked --profile ci
+
+      - name: Publish test report
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: target/nextest/ci/junit.xml
+          check_name: Rust Test Report
+          comment: true
+          detailed_summary: true
+          annotate_only: true

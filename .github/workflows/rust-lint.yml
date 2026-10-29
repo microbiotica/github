@@ -1,0 +1,54 @@
+name: Rust Lint
+on:
+  workflow_call:
+    inputs:
+      setup-python:
+        type: boolean
+        default: false
+        description: "Whether to install Python for pyo3 support"
+      python-version:
+        type: string
+        default: "3.12"
+        description: "The Python version to install if setup-python is true"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@nightly # review mode needs nightly rustfmt
+        with:
+          components: rustfmt
+
+      - uses: mbrobbel/rustfmt-check@0.23.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          mode: review
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        if: ${{ inputs.setup-python }}
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: giraffate/clippy-action@v1
+        with:
+          reporter: github-pr-review
+          clippy_flags: --all-targets --all-features -- -D warnings

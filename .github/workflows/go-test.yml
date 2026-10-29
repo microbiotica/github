@@ -1,4 +1,4 @@
-name: go-test
+name: Go Test
 on:
   workflow_call:
     secrets:
@@ -13,8 +13,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
-    name: test
+  go-test:
+    name: go test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
