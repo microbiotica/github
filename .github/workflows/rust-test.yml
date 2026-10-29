@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   rust-test:
-    name: rust test
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
