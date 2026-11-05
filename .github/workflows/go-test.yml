@@ -3,9 +3,15 @@ on:
   workflow_call:
     secrets:
       GH_GO_MODULES_APP_ID:
-        required: true
+        required: false
       GH_GO_MODULES_APP_PRIVATE_KEY:
-        required: true
+        required: false
+    inputs:
+      setup-internal-go:
+        description: Whether to setup access for internal Go modules. Can only be used by private repositories.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -21,6 +27,7 @@ jobs:
 
       - name: Setup Go
         uses: microbiotica/github/.github/actions/setup-go@main
+        if: inputs.setup-internal-go == 'true'
         with:
           app-id: ${{ secrets.GH_GO_MODULES_APP_ID }}
           private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
