@@ -31,7 +31,7 @@ jobs:
 
       - name: Setup Go
         uses: microbiotica/github/.github/actions/setup-go@main
-        if: inputs.setup-internal-go == 'true'
+        if: inputs.setup-internal-go
         with:
           app-id: ${{ secrets.GH_GO_MODULES_APP_ID }}
           private-key: ${{ secrets.GH_GO_MODULES_APP_PRIVATE_KEY }}
